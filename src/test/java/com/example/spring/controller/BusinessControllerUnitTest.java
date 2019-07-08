@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BusinessController.class)
-public class BusinessControllerTest {
+public class BusinessControllerUnitTest {
 
     @MockBean
     BusinessService businessService;
