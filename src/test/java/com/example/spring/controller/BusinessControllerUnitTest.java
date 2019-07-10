@@ -16,9 +16,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -71,4 +72,59 @@ public class BusinessControllerUnitTest {
         JSONAssert.assertEquals(result, mockMvcResult.getResponse().getContentAsString(), false);
 
     }
+
+    @Test
+    public void deleteBusiness() throws Exception{
+        BusinessDTO businessDTO=new BusinessDTO("Facebook", "Social Media");
+        when(businessService.delete(businessDTO)).thenReturn(businessDTO);
+
+        String content = "{\n" +
+                "\t\"name\": \"Facebook\",\n" +
+                "\t\"info\" : \"Social Media\"\n" +
+                "\t\n" +
+                "}";
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/business/delete" )
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteBusinessById() throws Exception{
+        BusinessDTO businessDTO=new BusinessDTO(1L, "Facebook", "Social Media");
+        when(businessService.deleteById(1L)).thenReturn(businessDTO);
+
+        String content = "{\n" +
+                "\t\"name\": \"Facebook\",\n" +
+                "\t\"info\" : \"Social Media\"\n" +
+                "\t\n" +
+                "}";
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/business/delete/1" )
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void update() throws Exception{
+        BusinessDTO businessDTO=new BusinessDTO(1L, "Facebook", "Social Media");
+
+        when(businessService.update(any())).thenReturn(businessDTO);
+
+        String content = "{\n" +
+                "\t\"name\": \"Facebook\",\n" +
+                "\t\"info\" : \"Social Media\"\n" +
+                "\t\n" +
+                "}";
+
+
+        MvcResult result=mockMvc.perform(MockMvcRequestBuilders.put("/api/business/update")
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
 }

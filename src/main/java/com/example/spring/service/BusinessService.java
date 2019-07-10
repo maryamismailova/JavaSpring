@@ -9,4 +9,7 @@ public interface BusinessService {
 
     BusinessDTO save(BusinessDTO businessDTO);
     Optional<BusinessDTO> getById(Long id);
+    BusinessDTO delete(BusinessDTO businessDTO);
+    BusinessDTO deleteById(Long id);
+    BusinessDTO update(BusinessDTO businessDTO);
 }

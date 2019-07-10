@@ -1,6 +1,7 @@
 package com.example.spring.controller;
 
 import com.example.spring.Application;
+import com.example.spring.domain.Business;
 import com.example.spring.service.dto.BusinessDTO;
 import org.json.JSONException;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -49,6 +51,21 @@ public class BusinessControllerIntegrationTest {
         ResponseEntity<String> dto = testRestTemplate.getForEntity(createURI("/api/business/1"), String.class);
         //JSONAssert converts your string into JSON object and the compares
         JSONAssert.assertEquals(result, dto.getBody(), false);
+    }
+
+
+
+    @Test
+    public void deleteById(){
+        BusinessDTO businessDTO = new BusinessDTO(1L, "Facebook", "Social Media");
+        String uri=createURI("/api/delete/1");
+
+        ResponseEntity<BusinessDTO> dto=testRestTemplate.exchange(uri, HttpMethod.DELETE, null, BusinessDTO.class );
+
+        assertThat(dto.getStatusCode(), equalTo(HttpStatus.OK));
+        assertThat(dto, equalTo(businessDTO));
+
+
     }
 
     private String createURI(String uri) {

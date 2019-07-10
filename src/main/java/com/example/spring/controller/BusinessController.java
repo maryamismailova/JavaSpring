@@ -1,6 +1,7 @@
 package com.example.spring.controller;
 
 
+import com.example.spring.domain.Business;
 import com.example.spring.exceptions.BadRequestException;
 import com.example.spring.service.BusinessService;
 import com.example.spring.service.dto.BusinessDTO;
@@ -43,6 +44,44 @@ public class BusinessController {
         Optional<BusinessDTO> result = businessService.getById(id);
 
         return ResponseEntity.ok().body(result);
+
+    }
+
+    @DeleteMapping("/business/delete")
+    public ResponseEntity<BusinessDTO> deleteBusiness(@RequestBody BusinessDTO businessDTO){
+        logger.debug("Rest request to delete business");
+
+        BusinessDTO deletedBusiness=businessService.delete(businessDTO);
+        if(businessService!=null){
+            return new ResponseEntity<>(HttpStatus.OK);//NOT SURE about status
+        }else{
+            throw new BadRequestException("Business doesn't exist");
+        }
+    }
+
+    @DeleteMapping("business/delete/{id}")
+    public ResponseEntity<BusinessDTO> deleteBusinessById(@PathVariable Long id){
+        logger.debug("Rest request to delete business by id");
+        if (id==null)
+            throw new BadRequestException("Enter valid id");//if not provided an id, inform with an exception
+        if(businessService.deleteById(id)!=null)
+            return  new ResponseEntity<>(HttpStatus.OK);
+        else
+            throw new BadRequestException("Business doesn't exist");
+    }
+
+    @PutMapping("business/update")
+    public ResponseEntity<BusinessDTO> updateBusiness(@RequestBody BusinessDTO businessDTO){
+        logger.debug("Rest request to update a business");
+        if(businessDTO!=null){
+            BusinessDTO dto=businessService.update(businessDTO);
+            if(dto!=null){
+                return new ResponseEntity<>(HttpStatus.OK);
+            }else{
+                throw new BadRequestException("Business doesnt exist 1");
+            }
+        }
+        throw new BadRequestException("Business doesn't exist");
 
     }
 

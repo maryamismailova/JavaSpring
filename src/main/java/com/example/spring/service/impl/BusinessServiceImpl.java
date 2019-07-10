@@ -1,6 +1,7 @@
 package com.example.spring.service.impl;
 
 import com.example.spring.domain.Business;
+import com.example.spring.exceptions.BadRequestException;
 import com.example.spring.service.BusinessService;
 import com.example.spring.service.dto.BusinessDTO;
 import com.example.spring.repository.AdvertisementRepository;
@@ -43,5 +44,38 @@ public class BusinessServiceImpl implements BusinessService {
     public Optional<BusinessDTO> getById(Long id) {
         return businessRepository.findById(id)
                 .map(businessMapper::toDTO);
+    }
+
+    @Override
+    public BusinessDTO delete(BusinessDTO businessDTO) {
+        logger.debug("Deleting business");
+        Business business=businessMapper.toEntity(businessDTO);
+        businessRepository.delete(business);
+        return businessMapper.toDTO(business);
+    }
+
+    @Override
+    public BusinessDTO deleteById(Long id) {
+        logger.debug("Deleting business");
+        if(businessRepository.findById(id).isPresent()) {
+            Business businessToDelete = businessRepository.findById(id).get();
+            businessRepository.delete(businessToDelete);
+            return businessMapper.toDTO(businessToDelete);
+        }else return null;
+    }
+
+    @Override
+    public BusinessDTO update(BusinessDTO businessDTO) {
+        logger.debug("Updating business with id="+businessDTO.getId());
+
+        Optional<Business> businessToUpdate=businessRepository.findById(businessDTO.getId());
+
+        if(businessToUpdate.isPresent()){
+            businessRepository.delete(businessToUpdate.get());
+            businessRepository.save(businessMapper.toEntity(businessDTO));
+            return businessDTO;
+        }else{
+            return null;
+        }
     }
 }
