@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -31,8 +32,9 @@ public class BusinessController {
         if (businessDTO.getId() != null){
             throw new BadRequestException("Business already exists");
         }
-        businessService.save(businessDTO);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        BusinessDTO result=businessService.save(businessDTO);
+//        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<BusinessDTO>(result, HttpStatus.CREATED);//to see also the created id
     }
 
     @GetMapping("/business/{id}")
@@ -42,30 +44,40 @@ public class BusinessController {
         }
 
         Optional<BusinessDTO> result = businessService.getById(id);
-
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().body(result);//create and send result + status on success
 
     }
 
+    @GetMapping("/business")
+    public ResponseEntity<List<BusinessDTO>> getAllBusinesses(){
+        logger.debug("Getting all businesses");
+
+        return new ResponseEntity<>(businessService.getAllBusinesses(), HttpStatus.OK);
+
+    }
+/*
     @DeleteMapping("/business/delete")
     public ResponseEntity<BusinessDTO> deleteBusiness(@RequestBody BusinessDTO businessDTO){
         logger.debug("Rest request to delete business");
 
         BusinessDTO deletedBusiness=businessService.delete(businessDTO);
-        if(businessService!=null){
+        if(deletedBusiness!=null){
             return new ResponseEntity<>(HttpStatus.OK);//NOT SURE about status
         }else{
             throw new BadRequestException("Business doesn't exist");
         }
     }
+*/
 
     @DeleteMapping("business/delete/{id}")
     public ResponseEntity<BusinessDTO> deleteBusinessById(@PathVariable Long id){
         logger.debug("Rest request to delete business by id");
         if (id==null)
             throw new BadRequestException("Enter valid id");//if not provided an id, inform with an exception
-        if(businessService.deleteById(id)!=null)
-            return  new ResponseEntity<>(HttpStatus.OK);
+        BusinessDTO result=businessService.deleteById(id);
+        if(result!=null)
+            return new ResponseEntity<>(result, HttpStatus.OK);
+//                    new ResponseEntity<>(HttpStatus.OK);
         else
             throw new BadRequestException("Business doesn't exist");
     }
@@ -73,13 +85,10 @@ public class BusinessController {
     @PutMapping("business/update")
     public ResponseEntity<BusinessDTO> updateBusiness(@RequestBody BusinessDTO businessDTO){
         logger.debug("Rest request to update a business");
-        if(businessDTO!=null){
+        if(businessDTO!=null && businessDTO.getId()!=null){//must provide id of business to update
             BusinessDTO dto=businessService.update(businessDTO);
-            if(dto!=null){
-                return new ResponseEntity<>(HttpStatus.OK);
-            }else{
-                throw new BadRequestException("Business doesnt exist 1");
-            }
+            if(dto!=null)
+                return new ResponseEntity<>(dto, HttpStatus.OK);
         }
         throw new BadRequestException("Business doesn't exist");
 

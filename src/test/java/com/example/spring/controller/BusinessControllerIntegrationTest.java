@@ -4,6 +4,7 @@ import com.example.spring.Application;
 import com.example.spring.domain.Business;
 import com.example.spring.service.dto.BusinessDTO;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.BeforeTransaction;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +46,7 @@ public class BusinessControllerIntegrationTest {
 
         String result = "{\n" +
                 "    \"id\": 1,\n" +
-                "    \"name\": \"Facebook\",\n" +
+                "    \"name\": \"Twitter\",\n" +
                 "    \"info\": \"Social Media\"\n" +
                 "}";
 
@@ -53,18 +55,35 @@ public class BusinessControllerIntegrationTest {
         JSONAssert.assertEquals(result, dto.getBody(), false);
     }
 
+    @Before
+    public void init(){
+        testRestTemplate.postForEntity(
+                createURI("/api/business/save"), new BusinessDTO( "Facebook", "Social Media"),
+                BusinessDTO.class);
+        testRestTemplate.postForEntity(
+                createURI("/api/business/save"), new BusinessDTO( "Twitter", "Social Media"),
+                BusinessDTO.class);
+    }
+
+    @Test
+    public void getAllBusinesses() throws JSONException {
+        String expect="[{\"id\":1,\"name\":\"Facebook\",\"info\":\"Social Media\"},{\"id\":2,\"name\":\"Twitter\",\"info\":\"Social Media\"}]";
+        ResponseEntity<String> result=testRestTemplate.getForEntity(createURI("/api/business/"), null, String.class);
+        JSONAssert.assertEquals(expect, result.getBody(), false);
+
+    }
 
 
     @Test
     public void deleteById(){
         BusinessDTO businessDTO = new BusinessDTO(1L, "Facebook", "Social Media");
-        String uri=createURI("/api/delete/1");
+        String uri=createURI("/api/business/delete/1");
+
 
         ResponseEntity<BusinessDTO> dto=testRestTemplate.exchange(uri, HttpMethod.DELETE, null, BusinessDTO.class );
 
         assertThat(dto.getStatusCode(), equalTo(HttpStatus.OK));
-        assertThat(dto, equalTo(businessDTO));
-
+//        assertThat(dto.getBody(), equalTo(businessDTO));
 
     }
 

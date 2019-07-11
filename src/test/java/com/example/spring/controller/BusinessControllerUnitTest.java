@@ -2,6 +2,7 @@ package com.example.spring.controller;
 
 import com.example.spring.service.BusinessService;
 import com.example.spring.service.dto.BusinessDTO;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -14,6 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -74,6 +77,23 @@ public class BusinessControllerUnitTest {
     }
 
     @Test
+    public void getAllBusinesses() throws Exception {
+        List<BusinessDTO> expected= Arrays.asList(new BusinessDTO(1L, "Facebook", "Social Media"),
+                new BusinessDTO(2L, "Twitter", "Social Media"));
+        String expectedString="[{\"id\":1,\"name\":\"Facebook\",\"info\":\"Social Media\"},{\"id\":2,\"name\":\"Twitter\",\"info\":\"Social Media\"}]";
+
+        when(businessService.getAllBusinesses()).thenReturn(expected);
+
+        MvcResult result=mockMvc.perform(MockMvcRequestBuilders.get("/api/business").
+                accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONAssert.assertEquals(expectedString, result.getResponse().getContentAsString(), false);
+
+
+    }
+/*
+    @Test
     public void deleteBusiness() throws Exception{
         BusinessDTO businessDTO=new BusinessDTO("Facebook", "Social Media");
         when(businessService.delete(businessDTO)).thenReturn(businessDTO);
@@ -89,7 +109,7 @@ public class BusinessControllerUnitTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
-
+*/
     @Test
     public void deleteBusinessById() throws Exception{
         BusinessDTO businessDTO=new BusinessDTO(1L, "Facebook", "Social Media");
@@ -113,6 +133,7 @@ public class BusinessControllerUnitTest {
         when(businessService.update(any())).thenReturn(businessDTO);
 
         String content = "{\n" +
+                "\t\"id\": 1,\n" +
                 "\t\"name\": \"Facebook\",\n" +
                 "\t\"info\" : \"Social Media\"\n" +
                 "\t\n" +

@@ -9,10 +9,17 @@ import com.example.spring.repository.BusinessRepository;
 import com.example.spring.service.mapper.BusinessMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 
 @Service
@@ -47,23 +54,17 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public BusinessDTO delete(BusinessDTO businessDTO) {
-        logger.debug("Deleting business");
-        Business business=businessMapper.toEntity(businessDTO);
-        businessRepository.delete(business);
-        return businessMapper.toDTO(business);
-    }
-
-    @Override
     public BusinessDTO deleteById(Long id) {
         logger.debug("Deleting business");
-        if(businessRepository.findById(id).isPresent()) {
-            Business businessToDelete = businessRepository.findById(id).get();
-            businessRepository.delete(businessToDelete);
-            return businessMapper.toDTO(businessToDelete);
-        }else return null;
+        Optional<Business> businessToDelete=businessRepository.findById(id);
+        if(businessToDelete.isPresent()){
+            businessRepository.deleteById(id);
+            return businessMapper.toDTO(businessToDelete.get());
+        }else return null;//no such business found
+
     }
 
+    //doesnt work correctly, changes the id
     @Override
     public BusinessDTO update(BusinessDTO businessDTO) {
         logger.debug("Updating business with id="+businessDTO.getId());
@@ -71,11 +72,23 @@ public class BusinessServiceImpl implements BusinessService {
         Optional<Business> businessToUpdate=businessRepository.findById(businessDTO.getId());
 
         if(businessToUpdate.isPresent()){
-            businessRepository.delete(businessToUpdate.get());
-            businessRepository.save(businessMapper.toEntity(businessDTO));
-            return businessDTO;
+            businessRepository.deleteById(businessDTO.getId());
+            Business updated=businessRepository.save(businessMapper.toEntity(businessDTO));
+            return businessMapper.toDTO(updated);
         }else{
             return null;
         }
     }
+
+    @Override
+    public List<BusinessDTO> getAllBusinesses() {
+        logger.debug("Getting all businesses");
+
+        List<BusinessDTO> all=businessRepository.findAll()
+                .stream()
+                .map((Business b)->{return businessMapper.toDTO(b);})
+                .collect(toList());
+        return all;
+    }
+
 }
